@@ -1,0 +1,123 @@
+import java.awt.Desktop;
+import java.io.*;
+import java.util.*;
+
+public class AddressBook {
+    public Map<String, String> contacts;
+    private final String fileName;
+
+    public AddressBook(String fileName) {
+        this.contacts = new HashMap<>();
+        this.fileName = fileName;
+    }
+
+    public void load() {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                contacts.put(parts[0], parts[1]);
+            }
+            System.out.println("Contactos cargados correctamente.");
+        } catch (IOException e) {
+            System.out.println("Error al cargar los contactos: " + e.getMessage());
+        }
+    }
+
+    public void save() {
+        try (PrintWriter writer = new PrintWriter(fileName)) {
+            for (Map.Entry<String, String> entry : contacts.entrySet()) {
+                writer.println(entry.getKey() + "," + entry.getValue());
+            }
+            System.out.println("Cambios guardados correctamente en la agenda.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error al guardar los cambios: " + e.getMessage());
+        }
+    }
+
+    public void list() {
+        System.out.println("Contactos:");
+        for (Map.Entry<String, String> entry : contacts.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+    }
+
+    public void create(String number, String name) {
+        contacts.put(number, name);
+        System.out.println("Contacto creado correctamente.");
+    }
+
+    public void delete(String number) {
+        if (contacts.containsKey(number)) {
+            contacts.remove(number);
+            System.out.println("Contacto eliminado correctamente.");
+        } else {
+            System.out.println("El contacto no existe.");
+        }
+    }
+
+    public static void main(String[] args) {
+        String fileName = "C:\\Users\\luisg\\OneDrive\\Documentos\\TAREAS TECMILENIO\\COMPUTACION EN JAVA\\ACT 4\\Contactos.txt";
+        AddressBook addressBook = new AddressBook(fileName);
+        addressBook.load();
+
+        Scanner scanner = new Scanner(System.in);
+
+        int choice = 0;
+        do {
+            System.out.println("\nMenú:");
+            System.out.println("1. Mostrar contactos");
+            System.out.println("2. Crear contacto");
+            System.out.println("3. Eliminar contacto");
+            System.out.println("4. Guardar cambios");
+            System.out.println("5. Abrir agenda");
+            System.out.println("6. Salir");
+
+            System.out.print("Elige una opción: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, ingresa un número válido.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    addressBook.list();
+                    break;
+                case 2:
+                    System.out.print("Ingresa el nombre: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Ingresa el número: ");
+                    String number = scanner.nextLine();
+                    addressBook.create(number, name);
+                    break;
+                case 3:
+                    System.out.print("Ingresa el número del contacto a eliminar: ");
+                    String numberToDelete = scanner.nextLine();
+                    addressBook.delete(numberToDelete);
+                    break;
+                case 4:
+                    addressBook.save();
+                    System.out.println("Cambios guardados.");
+                    break;
+                case 5:
+                    try {
+                        if (Desktop.isDesktopSupported()) {
+                            Desktop.getDesktop().open(new File(fileName));
+                        } else {
+                            System.out.println("La apertura de archivos no es soportada en este sistema.");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error al abrir la agenda: " + e.getMessage());
+                    }
+                    break;
+                case 6:
+                    System.out.println("Saliendo...");
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
+            }
+        } while (choice != 6);
+    }
+}
